@@ -1,4 +1,3 @@
-// server.js
 const express = require('express');
 
 const app = express();
@@ -17,12 +16,20 @@ app.get('/tasks', (req, res) => {
 
 // Endpoint untuk menambahkan tugas baru
 app.post('/tasks', (req, res) => {
+    const { title, description } = req.body;
+
+    // Validasi input
+    if (!title || !description) {
+        return res.status(400).json({ error: 'Title and description are required' });
+    }
+
     const task = {
         id: tasks.length + 1,
-        title: req.body.title,
-        description: req.body.description,
+        title,
+        description,
         completed: false,
     };
+
     tasks.push(task);
     res.status(201).json(task);
 });
@@ -30,7 +37,14 @@ app.post('/tasks', (req, res) => {
 // Endpoint untuk menghapus tugas
 app.delete('/tasks/:id', (req, res) => {
     const taskId = parseInt(req.params.id);
-    tasks = tasks.filter(task => task.id !== taskId);
+
+    // Validasi ID tugas
+    const taskIndex = tasks.findIndex(task => task.id === taskId);
+    if (taskIndex === -1) {
+        return res.status(404).json({ error: 'Task not found' });
+    }
+
+    tasks.splice(taskIndex, 1);
     res.json({ message: 'Task deleted' });
 });
 
